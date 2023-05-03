@@ -212,13 +212,18 @@ int main(void)
       leds.red = !leds.red;
       leds.set(&leds);
     }
+    PI_update();
     setDutyCycles();
-    motors.l.pi_data.duty_cycle = i;
-    motors.r.pi_data.duty_cycle = 100-i;
+    
     i++;
     HAL_Delay(5);
   }
 }
+
+struct Tick_Counts {
+  int16_t l;
+  int16_t r;
+} ticks;
 
 /**
   * @brief This function handles EXTI line 2 and 3 interrupts.
@@ -229,10 +234,12 @@ void EXTI2_3_IRQHandler(void)
   if (EXTI->PR & (1 << 2))
   {
     leds.green = !leds.green;
+    ticks.l += (motors.l.dir == F) - (motors.l.dir == R);
   }
   if (EXTI->PR & (1 << 3))
   {
     leds.orange = !leds.orange;
+    ticks.r += (motors.r.dir == F) - (motors.r.dir == R);
   }
   leds.set(&leds);
 
@@ -247,7 +254,15 @@ void TIM6_DAC_IRQHandler(void)
 {
   leds.blue = !leds.blue;
   leds.set(&leds);
-  
+
+  motors.l.pi_data.tick_rate = ticks.l;
+  ticks.l = 0;
+  motors.r.pi_data.tick_rate = ticks.r;
+  ticks.r = 0;
+
+  motors.l.pi_data.total_ticks += motors.l.pi_data.tick_rate;
+  motors.r.pi_data.total_ticks += motors.r.pi_data.tick_rate;
+
   TIM6->SR &= ~TIM_SR_UIF;        // Acknowledge the interrupt
 }
 
@@ -279,9 +294,6 @@ void PI_update() {
     myMotor->pi_data.error_integral += error;
     myMotor->pi_data.error_integral = (myMotor->pi_data.error_integral > 3200) ? 3200 : myMotor->pi_data.error_integral;
     myMotor->pi_data.error_integral = (myMotor->pi_data.error_integral < 0) ? 0 : myMotor->pi_data.error_integral; // do I want negative values?
-
-    // angular error calculation
-    angular_error = (meanTicks - myMotor->pi_data.tick_rate) << 7;
 
     // calculate output
     duty_cycle = (((error) << 1) + angular_error + myMotor->pi_data.error_integral) >> 5;
