@@ -1,0 +1,27 @@
+--cpu Cortex-M0
+"hercules\startup_stm32f072xb.o"
+"hercules\main.o"
+"hercules\stm32f0xx_it.o"
+"hercules\stm32f0xx_hal_msp.o"
+"hercules\stm32f0xx_hal_adc.o"
+"hercules\stm32f0xx_hal_adc_ex.o"
+"hercules\stm32f0xx_hal_rcc.o"
+"hercules\stm32f0xx_hal_rcc_ex.o"
+"hercules\stm32f0xx_hal.o"
+"hercules\stm32f0xx_hal_i2c.o"
+"hercules\stm32f0xx_hal_i2c_ex.o"
+"hercules\stm32f0xx_hal_gpio.o"
+"hercules\stm32f0xx_hal_dma.o"
+"hercules\stm32f0xx_hal_cortex.o"
+"hercules\stm32f0xx_hal_pwr.o"
+"hercules\stm32f0xx_hal_pwr_ex.o"
+"hercules\stm32f0xx_hal_flash.o"
+"hercules\stm32f0xx_hal_flash_ex.o"
+"hercules\stm32f0xx_hal_exti.o"
+"hercules\stm32f0xx_hal_tim.o"
+"hercules\stm32f0xx_hal_tim_ex.o"
+"hercules\system_stm32f0xx.o"
+--strict --scatter "hercules\hercules.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "hercules.map" -o hercules\hercules.axf
